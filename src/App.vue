@@ -1,22 +1,8 @@
 <script setup lang="ts">
-import {
-  defineComponent,
-  onMounted,
-  onUpdated,
-  reactive,
-  readonly,
-  ref,
-  VueElement,
-  type InputHTMLAttributes,
-} from "vue";
+import { onMounted, ref } from "vue";
 
 import MediaInfoFactory from "mediainfo.js";
-import type {
-  ResultObject,
-  MediaInfo,
-  ReadChunkFunc,
-  Result,
-} from "mediainfo.js/dist/types";
+import type { MediaInfo, ReadChunkFunc } from "mediainfo.js/dist/types";
 import { createFFmpeg, fetchFile, type FFmpeg } from "@ffmpeg/ffmpeg";
 
 let ffmpeg: FFmpeg;
@@ -30,12 +16,13 @@ const inputFile = ref<File | null>(null);
 const message = ref("Message here");
 const video = ref<string | null>(null);
 
-let targetSize = ref(8);
+const targetSize = ref(8);
 
-const onFileChanged = async (event: any) => {
-  if (!event.target) return;
-  if (event.target.files[0] === null) return;
-  inputFile.value = event.target.files[0];
+const onFileChanged = async (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  const file = (target.files as FileList)[0];
+
+  inputFile.value = file;
 };
 
 const getVideoInfo = async (file: File) => {
@@ -47,11 +34,13 @@ const getVideoInfo = async (file: File) => {
   const readChunk: ReadChunkFunc = (chunkSize: number, offset: number) =>
     new Promise((resolve, reject) => {
       let reader = new FileReader();
-      reader.onload = (event: any) => {
-        if (event.target.error) {
-          reject(event.target.error);
+      reader.onload = (event: Event) => {
+        const target = event.target as FileReader;
+        if (target.error) {
+          reject(target.error);
         }
-        resolve(new Uint8Array(event.target.result));
+        console.log(target.result);
+        resolve(new Uint8Array(target.result as ArrayBuffer));
       };
       reader.readAsArrayBuffer(file.slice(offset, offset + chunkSize));
     });
@@ -63,7 +52,6 @@ const getVideoInfo = async (file: File) => {
   mediainfo && mediainfo.close();
 
   if (typeof result != "object") return;
-
   duration = Number(result.media.track[0].Duration);
   audioRate = (result.media.track[2].BitRate as number) / 1024;
   targetMinimumSize = (targetVideoRate * duration) / 8192;
@@ -83,7 +71,7 @@ const getVideoInfo = async (file: File) => {
   } as VideoInfo;
 };
 
-const onSubmit = async (event: any) => {
+const onSubmit = async () => {
   if (!inputFile.value) return;
 
   const videoInfo = await getVideoInfo(inputFile.value);
