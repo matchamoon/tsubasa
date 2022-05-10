@@ -17,11 +17,18 @@ import type {
   ReadChunkFunc,
   Result,
 } from "mediainfo.js/dist/types";
-import { createFFmpeg, fetchFile } from "@ffmpeg/ffmpeg";
+import { createFFmpeg, fetchFile, type FFmpeg } from "@ffmpeg/ffmpeg";
+
+let ffmpeg: FFmpeg;
 
 //const root = ref<HTMLElement | null>(null);
-//onMounted(() => console.log(root.value?.outerHTML));
+onMounted(() => {
+  ffmpeg = createFFmpeg({ log: true });
+});
+
 const inputFile = ref<File | null>(null);
+const message = ref("Message here");
+const video = ref<string | null>(null);
 
 let targetSize = ref(8);
 
@@ -31,6 +38,8 @@ const onFileChanged = async (event: any) => {
   inputFile.value = event.target.files[0];
   //const file = event.target.files[0];
   console.log("selected file", inputFile.value?.name);
+  if (!inputFile.value) return;
+  console.log(await getVideoInfo(inputFile.value));
 };
 
 const getVideoInfo = async (file: File) => {
@@ -63,7 +72,7 @@ const getVideoInfo = async (file: File) => {
 
   duration = Number(result.media.track[0].Duration);
   audioRate = (result.media.track[2].BitRate as number) / 1024;
-  targetMinimumSize = (audioRate * duration) / 8192;
+  targetMinimumSize = (targetVideoRate * duration) / 8192;
 
   if (targetMinimumSize > targetSize.value) {
     console.error("bad size");
@@ -76,7 +85,6 @@ const getVideoInfo = async (file: File) => {
   return {
     duration,
     audioRate,
-    targetMinimumSize,
     targetVideoRate,
   } as VideoInfo;
 };
@@ -84,17 +92,46 @@ const getVideoInfo = async (file: File) => {
 const onSubmit = async (event: any) => {
   if (!inputFile.value) return;
 
-  getVideoInfo(inputFile.value).then((value) => {
-    if (!value) throw "Could not get video info";
-    const videoInfo = value;
-    console.log(videoInfo);
-  });
+  const videoInfo = await getVideoInfo(inputFile.value);
+  if (!videoInfo) throw "Could not get video info";
+
+  shrinkVideo(videoInfo);
+};
+
+const shrinkVideo = async (videoInfo: VideoInfo) => {
+  const inputFileName = inputFile.value?.name as string;
+
+  message.value = "Loading ffmeg-core.js";
+  await ffmpeg.load();
+  message.value = "Start transcoding";
+  ffmpeg.FS(
+    "writeFile",
+    inputFileName,
+    await fetchFile(inputFile.value as File)
+  );
+  await ffmpeg.run(
+    "-i",
+    inputFileName,
+    "-c:v",
+    "libx264",
+    "-b:v",
+    String(videoInfo.targetVideoRate) + "k",
+    "-c:a",
+    "aac",
+    "-b:a",
+    String(videoInfo.audioRate) + "k",
+    "output.mp4"
+  );
+  message.value = "Complete transcoding";
+  const data = ffmpeg.FS("readFile", "output.mp4");
+  video.value = URL.createObjectURL(
+    new Blob([data.buffer], { type: "video/mp4" })
+  );
 };
 
 type VideoInfo = {
   duration: number;
   audioRate: number;
-  targetMinimumSize: number;
   targetVideoRate: number;
 };
 </script>
@@ -111,7 +148,13 @@ type VideoInfo = {
           accept="video/mp4"
           v-on:change="onFileChanged"
         />
-        <button class="bg-white text-red-600" v-on:click="onSubmit">Submit</button>
+        <button class="bg-white text-red-600" v-on:click="onSubmit">
+          Submit
+        </button>
+        <div>{{ message }}</div>
+        <div>
+          <video v-if="video" :src="video" controls autoplay />
+        </div>
       </div>
     </div>
   </main>
