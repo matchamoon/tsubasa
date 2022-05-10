@@ -36,10 +36,6 @@ const onFileChanged = async (event: any) => {
   if (!event.target) return;
   if (event.target.files[0] === null) return;
   inputFile.value = event.target.files[0];
-  //const file = event.target.files[0];
-  console.log("selected file", inputFile.value?.name);
-  if (!inputFile.value) return;
-  console.log(await getVideoInfo(inputFile.value));
 };
 
 const getVideoInfo = async (file: File) => {
@@ -59,8 +55,6 @@ const getVideoInfo = async (file: File) => {
       };
       reader.readAsArrayBuffer(file.slice(offset, offset + chunkSize));
     });
-
-  //let mediainfo: MediaInfo | undefined;
 
   let mediainfo = (await MediaInfoFactory({ format: "object" })) as MediaInfo;
 

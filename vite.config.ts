@@ -11,7 +11,7 @@ export default defineConfig({
     viteStaticCopy({
       targets: [
         {
-          src: "/home/onesc/Code/Projects/tsubasa/node_modules/mediainfo.js/dist/MediaInfoModule.wasm",
+          src: "./node_modules/mediainfo.js/dist/MediaInfoModule.wasm",
           dest: ".",
         },
       ],
