@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { defineComponent, reactive, ref, VueElement } from "vue";
+import { defineComponent, onUpdated, reactive, ref, VueElement } from "vue";
+
 import MediaInfoFactory from "mediainfo.js";
 import type {
   ResultObject,
@@ -11,35 +12,25 @@ import { createFFmpeg, fetchFile } from "@ffmpeg/ffmpeg";
 
 let targetSize = ref(8);
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const onFileChanged = async (event: any) => {
   // TODO: Move all of this
+  if (!event.target) return;
 
   if (event.target.files[0] === null) return;
   const file = event.target.files[0];
   console.log("selected file", file.name);
 
-  const mediaInfo = (await getFileInfo(file)) as ResultObject;
-
-  let originalDuration = mediaInfo.media.track[0].Duration as number;
-  let originalAudioRate = (mediaInfo.media.track[2].BitRate as number) / 1024;
-  let targetMinimumSize = (originalAudioRate * originalDuration) / 8192;
-
-  if (targetMinimumSize > targetSize.value) {
-    console.error("bad size");
-    return;
-  }
-
-  let targetAudioRate = originalAudioRate;
-
-  let targetVideoRate =
-    (targetSize.value * 8192) / (1.048576 * originalDuration) -
-    originalAudioRate;
+  getVideoInfo(file).then((value) => {
+    if (!value) throw "Could not get video info";
+    const videoInfo = value;
+  });
 };
 
-const getFileInfo = async (file: File) => {
-  //let getSize = () => file.size;
-  //let getSize = file.size;
+const getVideoInfo = async (file: File) => {
+  let duration = 0;
+  let audioRate = 0;
+  let targetMinimumSize = 0;
+  let targetVideoRate = 0;
 
   const readChunk: ReadChunkFunc = (chunkSize: number, offset: number) =>
     new Promise((resolve, reject) => {
@@ -60,7 +51,38 @@ const getFileInfo = async (file: File) => {
   const result = await mediainfo.analyzeData(() => file.size, readChunk);
 
   mediainfo && mediainfo.close();
-  return result;
+
+  if (typeof result != "object") return;
+
+  duration = Number(result.media.track[0].Duration);
+  audioRate = (result.media.track[2].BitRate as number) / 1024;
+  targetMinimumSize = (audioRate * duration) / 8192;
+
+  if (targetMinimumSize > targetSize.value) {
+    console.error("bad size");
+    return;
+  }
+
+  targetVideoRate =
+    (targetSize.value * 8192) / (1.048576 * duration) - audioRate;
+
+  return {
+    duration,
+    audioRate,
+    targetMinimumSize,
+    targetVideoRate,
+  } as VideoInfo;
+};
+
+const onSubmit = async (event: any) => {
+  return;
+};
+
+type VideoInfo = {
+  duration: number;
+  audioRate: number;
+  targetMinimumSize: number;
+  targetVideoRate: number;
 };
 </script>
 
@@ -77,6 +99,7 @@ const getFileInfo = async (file: File) => {
           accept="video/mp4"
           v-on:change="onFileChanged"
         />
+        <button v-on:click="onSubmit">Submit</button>
       </div>
     </div>
   </main>
