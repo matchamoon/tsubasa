@@ -1,5 +1,14 @@
 <script setup lang="ts">
-import { defineComponent, onUpdated, reactive, ref, VueElement } from "vue";
+import {
+  defineComponent,
+  onMounted,
+  onUpdated,
+  reactive,
+  readonly,
+  ref,
+  VueElement,
+  type InputHTMLAttributes,
+} from "vue";
 
 import MediaInfoFactory from "mediainfo.js";
 import type {
@@ -10,20 +19,18 @@ import type {
 } from "mediainfo.js/dist/types";
 import { createFFmpeg, fetchFile } from "@ffmpeg/ffmpeg";
 
+//const root = ref<HTMLElement | null>(null);
+//onMounted(() => console.log(root.value?.outerHTML));
+const inputFile = ref<File | null>(null);
+
 let targetSize = ref(8);
 
 const onFileChanged = async (event: any) => {
-  // TODO: Move all of this
   if (!event.target) return;
-
   if (event.target.files[0] === null) return;
-  const file = event.target.files[0];
-  console.log("selected file", file.name);
-
-  getVideoInfo(file).then((value) => {
-    if (!value) throw "Could not get video info";
-    const videoInfo = value;
-  });
+  inputFile.value = event.target.files[0];
+  //const file = event.target.files[0];
+  console.log("selected file", inputFile.value?.name);
 };
 
 const getVideoInfo = async (file: File) => {
@@ -75,7 +82,13 @@ const getVideoInfo = async (file: File) => {
 };
 
 const onSubmit = async (event: any) => {
-  return;
+  if (!inputFile.value) return;
+
+  getVideoInfo(inputFile.value).then((value) => {
+    if (!value) throw "Could not get video info";
+    const videoInfo = value;
+    console.log(videoInfo);
+  });
 };
 
 type VideoInfo = {
@@ -95,11 +108,10 @@ type VideoInfo = {
         <input
           class="form-control block w-full px-3 py-1.5"
           type="file"
-          id="formFile"
           accept="video/mp4"
           v-on:change="onFileChanged"
         />
-        <button v-on:click="onSubmit">Submit</button>
+        <button class="bg-white text-red-600" v-on:click="onSubmit">Submit</button>
       </div>
     </div>
   </main>
