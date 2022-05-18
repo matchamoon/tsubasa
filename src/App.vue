@@ -5,12 +5,12 @@ import MediaInfoFactory from "mediainfo.js";
 import type { MediaInfo, ReadChunkFunc } from "mediainfo.js/dist/types";
 import { createFFmpeg, fetchFile, type FFmpeg } from "@ffmpeg/ffmpeg";
 
-let ffmpeg: FFmpeg;
+type VideoInfo = {
+  duration: number;
+  audioRate: number;
+};
 
-//const root = ref<HTMLElement | null>(null);
-onMounted(() => {
-  ffmpeg = createFFmpeg({ log: true });
-});
+let ffmpeg: FFmpeg;
 
 const inputFile = ref<File | null>(null);
 const message = ref("Message here");
@@ -18,11 +18,36 @@ const video = ref<string | null>(null);
 
 const targetSize = ref(8);
 
+// onMounted - initializes ffmpeg
+onMounted(() => {
+  ffmpeg = createFFmpeg({ log: true });
+});
+
+// onFileChanged - sets the inputFile to the file passed in
 const onFileChanged = async (event: Event) => {
   const target = event.target as HTMLInputElement;
-  const file = (target.files as FileList)[0];
 
-  inputFile.value = file;
+  if (!target.files?.[0]) {
+    throw new Error("No file selected");
+  }
+  inputFile.value = target.files[0];
+};
+
+// onSubmit - called when submit button is pressed245
+// reads the file and calls the ffmpeg function
+const onSubmit = async () => {
+  if (!inputFile.value) {
+    message.value = "No video selected.";
+    return;
+  }
+
+  const videoInfo = await getVideoInfo(inputFile.value);
+  if (!videoInfo) {
+    message.value = "Could not get video info";
+    return;
+  }
+
+  shrinkVideo(videoInfo);
 };
 
 const getVideoInfo = async (file: File) => {
@@ -61,27 +86,17 @@ const getVideoInfo = async (file: File) => {
     return;
   }
 
-  targetVideoRate =
-    (targetSize.value * 8192) / (1.048576 * duration) - audioRate;
-
   return {
     duration,
     audioRate,
-    targetVideoRate,
   } as VideoInfo;
-};
-
-const onSubmit = async () => {
-  if (!inputFile.value) return;
-
-  const videoInfo = await getVideoInfo(inputFile.value);
-  if (!videoInfo) throw "Could not get video info";
-
-  shrinkVideo(videoInfo);
 };
 
 const shrinkVideo = async (videoInfo: VideoInfo) => {
   const inputFileName = inputFile.value?.name as string;
+
+  const targetVideoRate =
+    (targetSize.value * 8192) / (1.048576 * videoInfo.duration) - videoInfo.duration;
 
   message.value = "Loading ffmeg-core.js";
   await ffmpeg.load();
@@ -97,7 +112,7 @@ const shrinkVideo = async (videoInfo: VideoInfo) => {
     "-c:v",
     "libx264",
     "-b:v",
-    String(videoInfo.targetVideoRate) + "k",
+    String(targetVideoRate) + "k",
     "-c:a",
     "aac",
     "-b:a",
@@ -109,12 +124,6 @@ const shrinkVideo = async (videoInfo: VideoInfo) => {
   video.value = URL.createObjectURL(
     new Blob([data.buffer], { type: "video/mp4" })
   );
-};
-
-type VideoInfo = {
-  duration: number;
-  audioRate: number;
-  targetVideoRate: number;
 };
 </script>
 
