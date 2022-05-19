@@ -1,26 +1,21 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 
-import MediaInfoFactory from "mediainfo.js";
-import type { MediaInfo, ReadChunkFunc } from "mediainfo.js/dist/types";
-import { createFFmpeg, fetchFile, type FFmpeg } from "@ffmpeg/ffmpeg";
-
-type VideoInfo = {
-  duration: number;
-  audioRate: number;
-};
-
-let ffmpeg: FFmpeg;
+import VideoService from "./services/video.service";
+import Messenger from "./utils/messenger.util";
 
 const inputFile = ref<File | null>(null);
-const message = ref("Message here");
+var message = ref("Message here");
 const video = ref<string | null>(null);
-
 const targetSize = ref(8);
+
+let vs: VideoService;
+
+const messenger = new Messenger();
 
 // onMounted - initializes ffmpeg
 onMounted(() => {
-  ffmpeg = createFFmpeg({ log: true });
+  vs = new VideoService(messenger);
 });
 
 // onFileChanged - sets the inputFile to the file passed in
@@ -37,92 +32,15 @@ const onFileChanged = async (event: Event) => {
 // reads the file and calls the ffmpeg function
 const onSubmit = async () => {
   if (!inputFile.value) {
-    message.value = "No video selected.";
+    messenger.sendMessage("No video selected.");
     return;
   }
 
-  const videoInfo = await getVideoInfo(inputFile.value);
-  if (!videoInfo) {
-    message.value = "Could not get video info";
-    return;
-  }
+  const videoData = await vs.shrinkVideo(inputFile.value, targetSize.value);
 
-  shrinkVideo(videoInfo);
-};
-
-const getVideoInfo = async (file: File) => {
-  let duration = 0;
-  let audioRate = 0;
-  let targetMinimumSize = 0;
-  let targetVideoRate = 0;
-
-  const readChunk: ReadChunkFunc = (chunkSize: number, offset: number) =>
-    new Promise((resolve, reject) => {
-      let reader = new FileReader();
-      reader.onload = (event: Event) => {
-        const target = event.target as FileReader;
-        if (target.error) {
-          reject(target.error);
-        }
-        console.log(target.result);
-        resolve(new Uint8Array(target.result as ArrayBuffer));
-      };
-      reader.readAsArrayBuffer(file.slice(offset, offset + chunkSize));
-    });
-
-  let mediainfo = (await MediaInfoFactory({ format: "object" })) as MediaInfo;
-
-  const result = await mediainfo.analyzeData(() => file.size, readChunk);
-
-  mediainfo && mediainfo.close();
-
-  if (typeof result != "object") return;
-  duration = Number(result.media.track[0].Duration);
-  audioRate = (result.media.track[2].BitRate as number) / 1024;
-  targetMinimumSize = (targetVideoRate * duration) / 8192;
-
-  if (targetMinimumSize > targetSize.value) {
-    console.error("bad size");
-    return;
-  }
-
-  return {
-    duration,
-    audioRate,
-  } as VideoInfo;
-};
-
-const shrinkVideo = async (videoInfo: VideoInfo) => {
-  const inputFileName = inputFile.value?.name as string;
-
-  const targetVideoRate =
-    (targetSize.value * 8192) / (1.048576 * videoInfo.duration) - videoInfo.duration;
-
-  message.value = "Loading ffmeg-core.js";
-  await ffmpeg.load();
-  message.value = "Start transcoding";
-  ffmpeg.FS(
-    "writeFile",
-    inputFileName,
-    await fetchFile(inputFile.value as File)
-  );
-  await ffmpeg.run(
-    "-i",
-    inputFileName,
-    "-c:v",
-    "libx264",
-    "-b:v",
-    String(targetVideoRate) + "k",
-    "-c:a",
-    "aac",
-    "-b:a",
-    String(videoInfo.audioRate) + "k",
-    "output.mp4"
-  );
-  message.value = "Complete transcoding";
-  const data = ffmpeg.FS("readFile", "output.mp4");
+  if (!videoData) return;
   video.value = URL.createObjectURL(
-    new Blob([data.buffer], { type: "video/mp4" })
+    new Blob([videoData.buffer], { type: "video/mp4" })
   );
 };
 </script>
