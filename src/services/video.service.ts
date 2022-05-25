@@ -13,7 +13,7 @@ type Parameters = {
   videoRate: number;
 };
 
-class VideoService {
+export default class VideoService {
   private ffmpeg: FFmpeg;
   private messenger: Messenger;
 
@@ -110,5 +110,3 @@ class VideoService {
     return data;
   }
 }
-
-export default VideoService;
