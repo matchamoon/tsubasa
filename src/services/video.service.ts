@@ -62,12 +62,9 @@ export default class VideoService {
 
   private getTargetParameters(originalInfo: ResultObject, targetSize: number) {
     const duration = Number(originalInfo.media.track[0].Duration);
-    let audioRate;
-    try {
-      audioRate = (originalInfo.media.track[2].BitRate as number) / 1024;
-    } catch {
-      audioRate = 0;
-    }
+
+    const audioRate = Number(originalInfo.media.track[2]) ?? 0;
+
     const videoRate = (targetSize * 8192) / (1.048576 * duration) - duration;
 
     return {
