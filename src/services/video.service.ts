@@ -1,3 +1,5 @@
+import { store } from "../store/index";
+
 import MediaInfoFactory from "mediainfo.js";
 import type {
   MediaInfo,
@@ -88,10 +90,13 @@ export default class VideoService {
       return;
     }
 
-    this.messenger.sendMessage("Loading ffmeg-core.js");
+    store.commit("consoleMsg", "Loading ffmeg-core.js");
     await this.ffmpeg.load();
-    this.messenger.sendMessage("Start transcoding");
+    store.commit("consoleMsg", "Start transcoding");
     this.ffmpeg.FS("writeFile", "input.mp4", await fetchFile(file));
+    this.ffmpeg.setProgress(({ ratio }) => {
+      store.commit("ffProgress", Number(Math.abs(ratio).toFixed(2))*100 );
+    });
     await this.ffmpeg.run(
       "-i",
       "input.mp4",
@@ -105,7 +110,7 @@ export default class VideoService {
       String(parameters.audioRate) + "k",
       "output.mp4"
     );
-    this.messenger.sendMessage("Complete transcoding");
+    store.commit("consoleMsg", "Complete transcoding");
     const data = this.ffmpeg.FS("readFile", "output.mp4");
 
     return data;

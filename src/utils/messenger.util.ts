@@ -1,3 +1,5 @@
+import { store } from "../store/index";
+
 class Messenger {
   onMessage = new Event("message");
 
@@ -5,6 +7,7 @@ class Messenger {
 
   sendMessage(message: string) {
     this.message = message;
+    store.commit("consoleMsg", message)
   }
 }
 

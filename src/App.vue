@@ -50,7 +50,11 @@
               🦋&ensp;Compress
             </button>
           </div>
-          <div class="pt-2 pb-2">{{ message }}</div>
+          <div class="pt-2 pb-2" v-if="store.state.consoleMsg">
+            <span class="absolute animate-bounce">🦋</span>
+            <span class="ml-8">{{ store.state.consoleMsg }}</span>
+            <span class="ml-2">{{ store.state.ffProgress }}%</span>
+          </div>
           <div class="pt-6 pb-2" v-if="video">
             <div class="pb-2 font-bold">🎊 Video Compressed 🎊</div>
             <video v-if="video" :src="video" class="rounded shadow cursor-pointer" controls />
@@ -75,6 +79,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
+import { store } from "./store/index";
 
 import VideoService from "./services/video.service";
 import Messenger from "./utils/messenger.util";
@@ -107,7 +112,7 @@ const onFileChanged = async (event: Event) => {
 // reads the file and calls the ffmpeg function
 const onSubmit = async () => {
   if (!inputFile.value) {
-    messenger.sendMessage("No video selected.");
+    store.commit('consoleMsg', message);
     return;
   }
 
