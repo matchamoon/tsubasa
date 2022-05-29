@@ -31,29 +31,44 @@
 
       <div class="mt-8 flex justify-center px-4 py-6 sm:p-8 rounded-lg shadow-lg bg-202020 w-full max-w-6xl mx-auto">
         <div class="w-full max-w-md">
-          <div class="pb-6">
-            <div class="pb-2 font-bold">Upload a file</div>
-            <input
-              class="form-control block w-full text-sm font-thin bg-161616/50 rounded cursor-pointer file:py-2 file:px-4 file:mr-4 file:rounded-none file:bg-161616 file:border-none file:text-sm file:font-normal file:text-gray-200"
-              type="file"
-              accept="video/mp4"
-              v-on:change="onFileChanged"
-            />
+          <div v-if="!store.state.consoleMsg">
+            <div class="pb-6">
+              <div class="pb-2 font-bold">Upload a file</div>
+              <input
+                class="form-control block w-full text-sm font-thin bg-161616/50 rounded cursor-pointer file:py-2 file:px-4 file:mr-4 file:rounded-none file:bg-161616 file:border-none file:text-sm file:font-normal file:text-gray-200"
+                type="file"
+                accept="video/mp4"
+                v-on:change="onFileChanged"
+              />
+            </div>
+            <div class="pb-6">
+              <div class="pb-2 font-bold">Choose your size</div>
+              <input class="bg-161616 rounded px-3 py-2 w-24 text-sm" type="number" v-model="targetSize" />
+              MB
+            </div>
+            <div class="pb-6 text-right">
+              <button class="bg-indigo-800 hover:bg-indigo-700 transition-colors duration-150 px-4 py-2 rounded text-gray-200" v-on:click="onSubmit">
+                🦋&ensp;Compress
+              </button>
+            </div>
           </div>
-          <div class="pb-6">
-            <div class="pb-2 font-bold">Choose your size</div>
-            <input class="bg-161616 rounded px-3 py-2 w-24 text-sm" type="number" v-model="targetSize" />
-            MB
+          <div v-else>
+            <div class="px-3 py-2 block text-sm bg-161616/50 rounded mt-2">{{ store.state.ffFilename }}</div>
+            <div class="px-3 py-2 block text-sm bg-161616/50 rounded mt-2">{{ targetSize }} MB</div>
+            <div class="pt-2 pb-2 text-right">
+              <button class="bg-transparent px-4 py-2 rounded text-gray-200" v-if="store.state.ffProgress < 100" v-on:click="reload()">
+                ❌
+              </button>
+              <button class="bg-indigo-800 shadow px-4 py-2 rounded text-gray-200" v-else v-on:click="reload()">
+                Compress new video
+              </button>
+            </div>
           </div>
-          <div class="pt-2 pb-6">
-            <button class="bg-indigo-800 hover:bg-indigo-700 transition-colors duration-150 px-4 py-2 rounded text-gray-200" v-on:click="onSubmit">
-              🦋&ensp;Compress
-            </button>
-          </div>
-          <div class="pt-2 pb-2" v-if="store.state.consoleMsg">
-            <span class="absolute animate-bounce">🦋</span>
+
+          <div class="pt-4 pb-2" v-if="store.state.consoleMsg">
+            <span class="absolute transition-all duration-150" :class="store.state.ffProgress < 100 ? 'animate-bounce' : ''">🦋</span>
             <span class="ml-8">{{ store.state.consoleMsg }}</span>
-            <span class="ml-2">{{ store.state.ffProgress }}%</span>
+            <span class="ml-2" v-if="store.state.ffProgress > 0">{{ store.state.ffProgress }}%</span>
           </div>
           <div class="pt-6 pb-2" v-if="video">
             <div class="pb-2 font-bold">🎊 Video Compressed 🎊</div>
@@ -106,6 +121,7 @@ const onFileChanged = async (event: Event) => {
     throw new Error("No file selected");
   }
   inputFile.value = target.files[0];
+  store.commit("ffFilename", target.files[0].name);
 };
 
 // onSubmit - called when submit button is pressed245
@@ -141,6 +157,9 @@ const onSubmit = async () => {
       let copyYear = 2022;
     },
     methods: {
+      reload() {
+        window.location.reload();
+      },
       scrollToTop() {
         window.scrollTo({top: 0, behavior: 'smooth'});
       },
