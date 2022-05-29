@@ -95,7 +95,7 @@ export default class VideoService {
     store.commit("consoleMsg", "Start transcoding");
     this.ffmpeg.FS("writeFile", "input.mp4", await fetchFile(file));
     this.ffmpeg.setProgress(({ ratio }) => {
-      store.commit("ffProgress", Number(Math.abs(ratio).toFixed(2))*100 );
+      store.commit("ffProgress", Math.floor(Number(Number(Math.abs(ratio))*100)) );
     });
     await this.ffmpeg.run(
       "-i",
