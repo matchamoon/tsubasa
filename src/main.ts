@@ -1,6 +1,6 @@
 import { createApp } from "vue";
 import App from "./App.vue";
-import { routes } from "./routes.js"
+import { routes } from "./router/index"
 import { createRouter, createWebHistory } from "vue-router"
 import { createStore } from "vuex"
 import "./assets/tailwind.css";
