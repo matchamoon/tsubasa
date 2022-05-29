@@ -111,7 +111,9 @@ const onSubmit = async () => {
     return;
   }
 
-  const videoData = await vs.shrinkVideo(inputFile.value, targetSize.value);
+  const renamedFile = new File([inputFile.value], "input.mp4");
+
+  const videoData = await vs.shrinkVideo(renamedFile, targetSize.value);
 
   if (!videoData) return;
   video.value = URL.createObjectURL(

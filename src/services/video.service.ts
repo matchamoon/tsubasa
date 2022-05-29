@@ -63,7 +63,8 @@ export default class VideoService {
   private getTargetParameters(originalInfo: ResultObject, targetSize: number) {
     const duration = Number(originalInfo.media.track[0].Duration);
 
-    const audioRate = Number(originalInfo.media.track[2]) / 1024 ?? 0;
+    const audioRate =
+      Number(originalInfo.media.track[2].BitRate as number) / 1024 ?? 0;
 
     const videoRate = (targetSize * 8192) / (1.048576 * duration) - duration;
 
@@ -87,15 +88,13 @@ export default class VideoService {
       return;
     }
 
-    const inputFileName = file.name as string;
-
     this.messenger.sendMessage("Loading ffmeg-core.js");
     await this.ffmpeg.load();
     this.messenger.sendMessage("Start transcoding");
-    this.ffmpeg.FS("writeFile", inputFileName, await fetchFile(file));
+    this.ffmpeg.FS("writeFile", "input.mp4", await fetchFile(file));
     await this.ffmpeg.run(
       "-i",
-      inputFileName,
+      "input.mp4",
       "-c:v",
       "libx264",
       "-b:v",
