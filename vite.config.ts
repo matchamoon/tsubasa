@@ -14,7 +14,7 @@ export default defineConfig({
       manifest: {
         name: "Tsubasa 🦋",
         short_name: "Tsubasa",
-        description: "Video compression made easy. Maintain the best quality while resizing your mp4 files to any size, for any purpose. Fast and private transcoding locally on any device.",
+        description: "Tsubasa is a fast video compression service that runs locally on your device. Maintain the best quality while staying under MB file limits.",
         background_color: "#6366f1",
         theme_color: "#6366f1",
       },
