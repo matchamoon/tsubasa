@@ -174,7 +174,7 @@ const onSubmit = async () => {
       sizeBytes(x: number){
         // https://stackoverflow.com/a/39906526/15923512 CC BY-SA 4.0
         const units = ['bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-        let l = 0, n = parseInt(x, 10) || 0;
+        let l = 0, n = x || 0;
         while(n >= 1024 && ++l){
           n = n/1024;
         }
