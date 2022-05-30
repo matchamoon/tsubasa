@@ -69,6 +69,9 @@
                 v-model="targetScale"
               />
             </div>
+            <div>
+              <div>Minimum size: {{ minimumSize }}</div>
+            </div>
             <div class="pb-2 text-right">
               <button
                 class="bg-indigo-800 hover:bg-indigo-700 transition-colors duration-150 px-4 py-2 rounded text-gray-200"
@@ -169,6 +172,8 @@ const video = ref<string | null>(null);
 const targetSize = ref(8);
 const targetScale = ref(1.0);
 
+let minimumSize = ref(0);
+
 let vs: VideoService;
 
 // onMounted - initializes ffmpeg
@@ -187,6 +192,11 @@ const onFileChanged = async (event: Event) => {
   inputFile.value = target.files[0];
   store.commit("ffFilename", target.files[0].name);
   store.commit("ffFilesize", target.files[0].size);
+
+  minimumSize.value = (await vs.getMinimumSize(
+    target.files[0],
+    targetScale.value
+  )) as number;
 };
 
 // onSubmit - called when submit button is pressed245

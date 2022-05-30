@@ -74,6 +74,16 @@ export default class VideoService {
     } as Parameters;
   }
 
+  public async getMinimumSize(file: File, targetSize: number) {
+    const videoInfo = await this.getVideoInfo(file);
+    if (!videoInfo)
+      return store.commit("consoleErr", "Could not get video info");
+
+    const parameters = this.getTargetParameters(videoInfo, targetSize);
+
+    return (parameters.audioRate * parameters.duration) / 8192;
+  }
+
   private async transcode(
     file: File,
     parameters: Parameters,
@@ -81,7 +91,7 @@ export default class VideoService {
     targetScale: number
   ) {
     const targetMinimumSize =
-      (parameters.videoRate * parameters.duration) / 8192;
+      (parameters.audioRate * parameters.duration) / 8192;
 
     if (targetMinimumSize > targetSize) {
       console.error("bad size");
