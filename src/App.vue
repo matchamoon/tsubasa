@@ -61,12 +61,15 @@
               >
             </div>
             <div>
+              Scale:
+              <output class="block">1</output>
               <input
                 type="range"
                 min="0.1"
                 max="1.0"
                 step="0.1"
                 v-model="targetScale"
+                oninput="this.previousElementSibling.value = this.value"
               />
             </div>
             <div>
