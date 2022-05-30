@@ -94,8 +94,7 @@ export default class VideoService {
       (parameters.audioRate * parameters.duration) / 8192;
 
     if (targetMinimumSize > targetSize) {
-      console.error("bad size");
-      return;
+      return store.commit("consoleErr", "Target size too small");
     }
 
     store.commit("consoleMsg", "Loading ffmeg-core.js");
