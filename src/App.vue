@@ -31,7 +31,7 @@
 
       <div class="mt-8 flex justify-center px-4 py-6 sm:p-8 rounded-lg shadow-lg bg-202020 w-full max-w-6xl mx-auto">
         <div class="w-full max-w-md">
-          <div v-if="!store.state.consoleMsg">
+          <div v-if="!store.state.ffFileOk">
             <div class="pb-6">
               <div class="pb-2 font-bold">Upload a file</div>
               <input
@@ -44,17 +44,17 @@
             <div class="pb-6">
               <div class="pb-2 font-bold">Choose your size</div>
               <input class="bg-161616 rounded px-3 py-2 w-24 text-sm" type="number" v-model="targetSize" />
-              MB
+              MB<span v-if="store.state.ffFilesize" class="pl-4 text-sm">(original file: {{ sizeBytes(Number(store.state.ffFilesize)) }})</span>
             </div>
-            <div class="pb-6 text-right">
+            <div class="pb-2 text-right">
               <button class="bg-indigo-800 hover:bg-indigo-700 transition-colors duration-150 px-4 py-2 rounded text-gray-200" v-on:click="onSubmit">
                 🦋&ensp;Compress
               </button>
             </div>
           </div>
           <div v-else>
-            <div class="px-3 py-2 block text-sm bg-161616/50 rounded mt-2">{{ store.state.ffFilename }}</div>
-            <div class="px-3 py-2 block text-sm bg-161616/50 rounded mt-2">{{ targetSize }} MB</div>
+            <div class="px-3 py-2 block text-sm bg-161616/25 rounded mt-2 cursor-default">{{ store.state.ffFilename }}</div>
+            <div class="px-3 py-2 block text-sm bg-161616/25 rounded mt-2 cursor-default">{{ sizeBytes(Number(store.state.ffFilesize)) }} -> {{ targetSize }} MB</div>
             <div class="pt-2 pb-2 text-right">
               <button class="bg-transparent px-4 py-2 rounded text-gray-200" v-if="store.state.ffProgress < 100" v-on:click="reload()">
                 ❌
@@ -65,7 +65,11 @@
             </div>
           </div>
 
-          <div class="pt-4 pb-2" v-if="store.state.consoleMsg">
+          <div class="pt-2 pb-2" v-if="!store.state.ffFileOk && store.state.consoleErr">
+            <span class="absolute transition-all duration-150">⚠</span>
+            <span class="ml-8">{{ store.state.consoleErr }}</span>
+          </div>
+          <div class="pt-6 pb-2" v-if="store.state.consoleMsg">
             <span class="absolute transition-all duration-150" :class="store.state.ffProgress < 100 ? 'animate-bounce' : ''">🦋</span>
             <span class="ml-8">{{ store.state.consoleMsg }}</span>
             <span class="ml-2" v-if="store.state.ffProgress > 0">{{ store.state.ffProgress }}%</span>
@@ -115,19 +119,26 @@ const onFileChanged = async (event: Event) => {
   const target = event.target as HTMLInputElement;
 
   if (!target.files?.[0]) {
+    store.commit("consoleErr", "No file selected");
     throw new Error("No file selected");
   }
+  store.commit("consoleErr", "");
   inputFile.value = target.files[0];
   store.commit("ffFilename", target.files[0].name);
+  store.commit("ffFilesize", target.files[0].size);
 };
 
 // onSubmit - called when submit button is pressed245
 // reads the file and calls the ffmpeg function
 const onSubmit = async () => {
   if (!inputFile.value) {
-    store.commit('consoleMsg', message);
-    return;
+    return store.commit('consoleErr', "No file selected");
   }
+  if (store.state.ffFilesize <= Number(targetSize.value)*1024*1024) {
+    return store.commit("consoleErr", "File is smaller than your target size!");
+  }
+
+  store.commit('ffFileOk', true);
 
   const renamedFile = new File([inputFile.value], "input.mp4");
 
@@ -160,6 +171,15 @@ const onSubmit = async () => {
       scrollToTop() {
         window.scrollTo({top: 0, behavior: 'smooth'});
       },
+      sizeBytes(x: number){
+        // https://stackoverflow.com/a/39906526/15923512 CC BY-SA 4.0
+        const units = ['bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+        let l = 0, n = parseInt(x, 10) || 0;
+        while(n >= 1024 && ++l){
+          n = n/1024;
+        }
+        return(n.toFixed(n < 10 && l > 0 ? 1 : 0) + ' ' + units[l]);
+      }
     },
   }
 </script>
