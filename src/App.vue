@@ -132,13 +132,13 @@ const onFileChanged = async (event: Event) => {
 // reads the file and calls the ffmpeg function
 const onSubmit = async () => {
   if (!inputFile.value) {
-    return store.commit('consoleErr', "No file selected");
+    return store.commit("consoleErr", "No file selected");
   }
   if (store.state.ffFilesize <= Number(targetSize.value)*1024*1024) {
     return store.commit("consoleErr", "File is smaller than your target size!");
   }
 
-  store.commit('ffFileOk', true);
+  store.commit("ffFileOk", true);
 
   const renamedFile = new File([inputFile.value], "input.mp4");
 
