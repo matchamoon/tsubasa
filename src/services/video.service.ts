@@ -7,7 +7,6 @@ import type {
   ResultObject,
 } from "mediainfo.js/dist/types";
 import { createFFmpeg, fetchFile, type FFmpeg } from "@ffmpeg/ffmpeg";
-import type Messenger from "../utils/messenger.util";
 
 type Parameters = {
   duration: number;
@@ -17,10 +16,8 @@ type Parameters = {
 
 export default class VideoService {
   private ffmpeg: FFmpeg;
-  private messenger: Messenger;
 
-  constructor(messenger: Messenger) {
-    this.messenger = messenger;
+  constructor() {
     this.ffmpeg = createFFmpeg({ log: true });
   }
 
@@ -95,7 +92,10 @@ export default class VideoService {
     store.commit("consoleMsg", "Start transcoding");
     this.ffmpeg.FS("writeFile", "input.mp4", await fetchFile(file));
     this.ffmpeg.setProgress(({ ratio }) => {
-      store.commit("ffProgress", Math.floor(Number(Number(Math.abs(ratio))*100)) );
+      store.commit(
+        "ffProgress",
+        Math.floor(Number(Number(Math.abs(ratio)) * 100))
+      );
     });
     await this.ffmpeg.run(
       "-i",

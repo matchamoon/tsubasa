@@ -97,7 +97,6 @@ import { onMounted, ref } from "vue";
 import { store } from "./store/index";
 
 import VideoService from "./services/video.service";
-import Messenger from "./utils/messenger.util";
 
 const inputFile = ref<File | null>(null);
 var message = ref("Message here");
@@ -106,11 +105,9 @@ const targetSize = ref(8);
 
 let vs: VideoService;
 
-const messenger = new Messenger();
-
 // onMounted - initializes ffmpeg
 onMounted(() => {
-  vs = new VideoService(messenger);
+  vs = new VideoService();
 });
 
 // onFileChanged - sets the inputFile to the file passed in
