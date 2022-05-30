@@ -11,8 +11,8 @@ Tsubasa is a fast video compression service that runs locally on your device. Ma
 Tsubasa was created as a proof-of-concept for a ffmpeg-wasm implementation.
 
 - ✅ Allows transcoding to a size limit (for services with a file size upload limit)
-- ✅ Prioritizes visual quality/bitrate, by allowing resolution to change
-- ✅ Prioritizes audio quality
+- ✅ Allows scaling resolution, to preserve video quality/bitrate
+- ✅ Preserves audio quality
 - ✅ Runs locally on your device
 
 ## Development
