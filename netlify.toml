@@ -1,6 +1,6 @@
 [[headers]]
   for = "/*"
   [headers.values]
-    Permissions-Policy = "interest-cohort=()"
-    Cross-Origin-Opener-Policy = "same-origin"
     Cross-Origin-Embedder-Policy = "require-corp"
+    Cross-Origin-Opener-Policy = "same-origin"
+    Permissions-Policy = "interest-cohort=()"
