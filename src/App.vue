@@ -60,6 +60,15 @@
                 {{ sizeBytes(Number(store.state.ffFilesize)) }})</span
               >
             </div>
+            <div>
+              <input
+                type="range"
+                min="0.1"
+                max="1.0"
+                step="0.1"
+                v-model="targetScale"
+              />
+            </div>
             <div class="pb-2 text-right">
               <button
                 class="bg-indigo-800 hover:bg-indigo-700 transition-colors duration-150 px-4 py-2 rounded text-gray-200"
@@ -158,6 +167,7 @@ import VideoService from "./services/video.service";
 const inputFile = ref<File | null>(null);
 const video = ref<string | null>(null);
 const targetSize = ref(8);
+const targetScale = ref(1.0);
 
 let vs: VideoService;
 
@@ -193,7 +203,11 @@ const onSubmit = async () => {
 
   const renamedFile = new File([inputFile.value], "input.mp4");
 
-  const videoData = await vs.shrinkVideo(renamedFile, targetSize.value);
+  const videoData = await vs.shrinkVideo(
+    renamedFile,
+    targetSize.value,
+    targetScale.value
+  );
 
   if (!videoData) return;
   video.value = URL.createObjectURL(

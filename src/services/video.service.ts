@@ -21,14 +21,14 @@ export default class VideoService {
     this.ffmpeg = createFFmpeg({ log: true });
   }
 
-  async shrinkVideo(file: File, targetSize: number) {
+  async shrinkVideo(file: File, targetSize: number, targetScale: number) {
     const originalInfo = await this.getVideoInfo(file);
 
     if (typeof originalInfo != "object") return;
 
     const parameters = this.getTargetParameters(originalInfo, targetSize);
 
-    return this.transcode(file, parameters, targetSize);
+    return this.transcode(file, parameters, targetSize, targetScale);
   }
 
   private async getVideoInfo(file: File) {
@@ -77,7 +77,8 @@ export default class VideoService {
   private async transcode(
     file: File,
     parameters: Parameters,
-    targetSize: number
+    targetSize: number,
+    targetScale: number
   ) {
     const targetMinimumSize =
       (parameters.videoRate * parameters.duration) / 8192;
@@ -104,6 +105,8 @@ export default class VideoService {
       "libx264",
       "-b:v",
       String(parameters.videoRate) + "k",
+      "-vf",
+      `scale=iw*${targetScale}:ih*${targetScale}`,
       "-c:a",
       "aac",
       "-b:a",
