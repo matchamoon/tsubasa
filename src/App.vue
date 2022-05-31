@@ -44,7 +44,7 @@
           <router-link
             to="/about"
             class="text-gray-500 transition duration-300 hover:text-gray-400"
-            >See About/Terms/Privacy</router-link
+            >About Us・Licenses</router-link
           >
         </div>
       </div>
