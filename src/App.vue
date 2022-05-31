@@ -168,7 +168,7 @@
 import { onMounted, ref } from "vue";
 import { store } from "./store/index";
 
-import VideoService from "./services/video.service";
+import VideoService from "./common/video.service";
 
 const inputFile = ref<File | null>(null);
 const video = ref<string | null>(null);
