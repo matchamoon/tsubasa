@@ -4,3 +4,8 @@
     Cross-Origin-Embedder-Policy = "require-corp"
     Cross-Origin-Opener-Policy = "same-origin"
     Permissions-Policy = "interest-cohort=()"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
