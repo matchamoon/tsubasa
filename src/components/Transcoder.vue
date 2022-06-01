@@ -21,7 +21,11 @@
             v-model="targetSize"
           />
           MB
-          <div class="pt-2 pb-2 text-sm text-gray-300">Original size: {{ store.state.ffFilesize ? sizeBytes(Number(store.state.ffFilesize)) : "-" }}</div>
+          <div class="pt-2 pb-2 text-sm text-gray-300">
+            <span class="text-xs px-3 py-1 bg-161616/50 text-gray-300 rounded select-none mr-1">Original</span>
+            {{ store.state.ffFilesize ? sizeBytes(Number(store.state.ffFilesize)) : "-" }}
+            <span class="text-xs px-3 py-1 bg-161616/50 text-gray-300 rounded select-none ml-2 mr-1">Minimum</span>
+            {{ minimumSize ? sizeBytes(Number(minimumSize)) : "-" }}</div>
         </div>
         <div class="pb-6">
           <div class="pb-2 font-bold">Choose video resolution</div>
@@ -154,10 +158,10 @@ const onFileChanged = async (event: Event) => {
   store.commit("ffFilesize", target.files[0].size);
 
   // Adjust targetSize if targetSize > originalSize (bytes -> MB)
-  if (8 > Number(target.files[0].size)/1024/1024) {
+  if (targetSize.value > Number(target.files[0].size)/1024/1024) {
     // If originalSize is smaller than 8 MB, just use the originalSize
     targetSize.value = Number(target.files[0].size)/1024/1024;
-  } else {
+  } else if (targetSize.value < 8) {
     // Reset to 8 MB for all videos larger than 8 MB
     targetSize.value = 8;
   };
