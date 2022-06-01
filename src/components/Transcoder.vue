@@ -7,7 +7,7 @@
         <div class="pb-6">
           <div class="pb-2 font-bold">Upload a file</div>
           <input
-            class="form-control block w-full text-sm font-thin bg-161616/50 rounded cursor-pointer file:py-2 file:px-4 file:mr-4 file:rounded-none file:bg-161616 file:border-none file:text-sm file:font-normal file:text-gray-200"
+            class="form-control block w-full text-sm font-light bg-161616/50 rounded cursor-pointer file:py-2 file:px-4 file:mr-4 file:rounded-none file:bg-161616 file:border-none file:text-sm file:font-normal file:text-gray-200"
             type="file"
             accept="video/mp4"
             v-on:change="onFileChanged"
@@ -37,7 +37,7 @@
               :id="'res-'+String(res)"
             >
               <button
-                class="px-3 py-2 text-sm text-gray-200 font-bold transition duration-150 rounded"
+                class="px-3 py-2 text-xs text-gray-200 transition duration-150 rounded"
                 :class="String(targetScale) == String(res) ? 'bg-indigo-800/80 hover:bg-indigo-800/70' : 'bg-indigo-800/30 hover:bg-indigo-800/50'"
                 @click="targetScale = res"
               >{{ res }}x</button>
