@@ -20,25 +20,25 @@
             type="number"
             v-model="targetSize"
           />
-          MB<span v-if="store.state.ffFilesize" class="pl-4 text-sm"
-            >(original file:
-            {{ sizeBytes(Number(store.state.ffFilesize)) }})</span
-          >
+          MB
+          <div class="pt-2 pb-2 text-sm text-gray-300">Original size: {{ store.state.ffFilesize ? sizeBytes(Number(store.state.ffFilesize)) : "-" }}</div>
         </div>
-        <div>
-          Scale:
-          <output class="block">1</output>
-          <input
-            type="range"
-            min="0.1"
-            max="1.0"
-            step="0.1"
-            v-model="targetScale"
-            oninput="this.previousElementSibling.value = this.value"
-          />
-        </div>
-        <div>
-          <div>Minimum size: {{ minimumSize }}</div>
+        <div class="pb-6">
+          <div class="pb-2 font-bold">Choose video resolution</div>
+          <div class="flex flex-wrap gap-x-2 gap-y-1">
+            <div
+              v-for="res in resScale"
+              :key="res"
+              :id="'res-'+String(res)"
+            >
+              <button
+                class="px-3 py-2 text-sm text-gray-200 font-bold transition duration-150 rounded"
+                :class="String(targetScale) == String(res) ? 'bg-indigo-800/80 hover:bg-indigo-800/70' : 'bg-indigo-800/30 hover:bg-indigo-800/50'"
+                @click="targetScale = res"
+              >{{ res }}x</button>
+            </div>
+          </div>
+          <div class="pt-2 pb-2 text-sm text-gray-300" v-if="targetScaleAuto">We recommend decreasing video resolution for better results :')</div>
         </div>
         <div class="pb-2 text-right">
           <button
@@ -59,7 +59,12 @@
           class="px-3 py-2 block text-sm bg-161616/25 rounded mt-2 cursor-default"
         >
           {{ sizeBytes(Number(store.state.ffFilesize)) }} ->
-          {{ targetSize }} MB
+          {{ sizeBytes(Number(targetSize*1024*1024)) }}
+        </div>
+        <div
+          class="px-3 py-2 block text-sm bg-161616/25 rounded mt-2 cursor-default"
+        >
+          {{ targetScale }}x resolution
         </div>
         <div class="pt-2 pb-2 text-right">
           <button
@@ -122,9 +127,11 @@ import VideoService from "../common/video.service";
 
 const inputFile = ref<File | null>(null);
 const video = ref<string | null>(null);
-const targetSize = ref(8);
-const targetScale = ref(1.0);
 
+let targetSize = ref(8);
+let targetScale = ref(1.0);
+let targetScaleAuto = ref(false);
+let resScale = ref([1.0, 0.75, 0.5, 0.25]);
 let minimumSize = ref(0);
 
 let vs: VideoService;
@@ -146,6 +153,26 @@ const onFileChanged = async (event: Event) => {
   store.commit("ffFilename", target.files[0].name);
   store.commit("ffFilesize", target.files[0].size);
 
+  // Adjust targetSize if targetSize > originalSize (bytes -> MB)
+  if (1 > Number(target.files[0].size)/1024/1024) {
+    // If originalSize is smaller than 1 MB, just use the originalSize
+    targetSize.value = Number(target.files[0].size)/1024/1024;
+  } else if (8 > Number(target.files[0].size)/1024/1024) {
+    // Use integer value between 1 - 8 MB
+    targetSize.value = Math.floor(Number(target.files[0].size)/1024/1024);
+  } else {
+    // Reset to 8 MB for all videos larger than 8 MB
+    targetSize.value = 8;
+  };
+
+  // Adjust targetScale if ratio between targetSize and originalSize is too big
+  let targetScaleRatio = (Number(targetSize.value)*1.5) / (Number(target.files[0].size)/1024/1024);
+  let targetScaleRecc = resScale.value.reduce(function(upper, lower) {
+    return (Math.min(lower, targetScaleRatio) != targetScaleRatio ? upper : lower);
+  });
+  targetScaleRecc != 1.0 ? targetScaleAuto.value = true : targetScaleAuto.value = false;
+  targetScale.value = targetScaleRecc;
+
   minimumSize.value = (await vs.getMinimumSize(
     target.files[0],
     targetScale.value
@@ -158,7 +185,7 @@ const onSubmit = async () => {
   if (!inputFile.value) {
     return store.commit("consoleErr", "No file selected");
   }
-  if (store.state.ffFilesize <= Number(targetSize.value) * 1024 * 1024) {
+  if (store.state.ffFilesize < Number(targetSize.value) * 1024 * 1024) {
     return store.commit("consoleErr", "File is smaller than your target size!");
   }
 
