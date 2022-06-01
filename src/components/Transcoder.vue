@@ -174,10 +174,13 @@ const onFileChanged = async (event: Event) => {
   store.commit("ffFilesize", target.files[0].size);
 
   // Adjust targetSize if targetSize > originalSize (bytes -> MB)
-  if (targetSize.value > Number(target.files[0].size)/1024/1024) {
-    // If originalSize is smaller than 8 MB, just use the originalSize
+  if (1 > Number(target.files[0].size)/1024/1024) {
+    // If originalSize is smaller than 1 MB, just use the originalSize
     targetSize.value = Number(target.files[0].size)/1024/1024;
-  } else if (targetSize.value < 8) {
+  } else if (8 > Number(target.files[0].size)/1024/1024) {
+    // If originalSize is smaller than 8 MB, use Math.floor()
+    targetSize.value = Math.floor(Number(target.files[0].size)/1024/1024);
+  } else if (targetSize.value > Number(target.files[0].size)/1024/1024) {
     // Reset to 8 MB for all videos larger than 8 MB
     targetSize.value = 8;
   };
@@ -190,10 +193,15 @@ const onFileChanged = async (event: Event) => {
   targetScaleRecc != 1.0 ? targetScaleAuto.value = true : targetScaleAuto.value = false;
   targetScale.value = targetScaleRecc;
 
-  minimumSize.value = (await vs.getMinimumSize(
-    target.files[0],
-    targetScale.value
-  )) as number;
+  try {
+    minimumSize.value = (await vs.getMinimumSize(
+      target.files[0],
+      targetSize.value
+    )) as number;
+  } catch {
+    // Likely no audio if this failed
+    minimumSize.value = 0
+  }
   store.commit("ffFileOkPre", false);
 };
 
