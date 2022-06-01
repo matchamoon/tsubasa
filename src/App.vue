@@ -44,7 +44,7 @@
           <router-link
             to="/about"
             class="text-gray-500 transition duration-300 hover:text-gray-400"
-            >About Us・Licenses</router-link
+            >About Us・Source Code・Licenses</router-link
           >
         </div>
       </div>
