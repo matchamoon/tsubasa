@@ -154,12 +154,9 @@ const onFileChanged = async (event: Event) => {
   store.commit("ffFilesize", target.files[0].size);
 
   // Adjust targetSize if targetSize > originalSize (bytes -> MB)
-  if (1 > Number(target.files[0].size)/1024/1024) {
-    // If originalSize is smaller than 1 MB, just use the originalSize
+  if (8 > Number(target.files[0].size)/1024/1024) {
+    // If originalSize is smaller than 8 MB, just use the originalSize
     targetSize.value = Number(target.files[0].size)/1024/1024;
-  } else if (8 > Number(target.files[0].size)/1024/1024) {
-    // Use integer value between 1 - 8 MB
-    targetSize.value = Math.floor(Number(target.files[0].size)/1024/1024);
   } else {
     // Reset to 8 MB for all videos larger than 8 MB
     targetSize.value = 8;
