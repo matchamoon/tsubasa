@@ -164,7 +164,7 @@ onMounted(() => {
 const onFileChanged = async (event: Event) => {
   const target = event.target as HTMLInputElement;
 
-  if (!target.files) {
+  if (!target.files || !targetSize.value) {
     return store.commit("consoleErr", "No file selected");
   }
   store.commit("consoleErr", "");
@@ -246,7 +246,7 @@ export default {
       while (n >= 1024 && ++l) {
         n = n / 1024;
       }
-      return n.toFixed(n < 10 && l > 0 ? 1 : 0) + " " + units[l];
+      return n.toFixed(n < 10 && l > 0 ? 2 : 0) + " " + units[l];
     },
   },
 };

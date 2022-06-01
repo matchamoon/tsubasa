@@ -92,7 +92,7 @@ export default class VideoService {
     targetScale: number
   ) {
     const targetMinimumSize =
-      ((parameters.audioRate * parameters.duration) / 8192) * 1024 * 1024;
+      ((parameters.audioRate * parameters.duration) / 8192);
 
     if (targetMinimumSize > targetSize) {
       return store.commit("consoleErr", "Target size too small");
