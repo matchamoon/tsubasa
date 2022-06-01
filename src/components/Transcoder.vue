@@ -12,6 +12,12 @@
             accept="video/mp4"
             v-on:change="onFileChanged"
           />
+          <div class="pt-2 pb-2 text-sm text-gray-300">
+            <span class="text-xs px-3 py-1 bg-161616/50 text-gray-300 rounded select-none mr-1">Original</span>
+            {{ store.state.ffFilesize ? sizeBytes(Number(store.state.ffFilesize)) : "-" }}
+            <span class="text-xs px-3 py-1 bg-161616/50 text-gray-300 rounded select-none ml-2 mr-1">Minimum</span>
+            {{ minimumSize ? sizeBytes(Number(minimumSize)) : "-" }}
+          </div>
         </div>
         <div class="pb-6">
           <div class="pb-2 font-bold">Choose your size</div>
@@ -21,11 +27,6 @@
             v-model="targetSize"
           />
           MB
-          <div class="pt-2 pb-2 text-sm text-gray-300">
-            <span class="text-xs px-3 py-1 bg-161616/50 text-gray-300 rounded select-none mr-1">Original</span>
-            {{ store.state.ffFilesize ? sizeBytes(Number(store.state.ffFilesize)) : "-" }}
-            <span class="text-xs px-3 py-1 bg-161616/50 text-gray-300 rounded select-none ml-2 mr-1">Minimum</span>
-            {{ minimumSize ? sizeBytes(Number(minimumSize)) : "-" }}</div>
         </div>
         <div class="pb-6">
           <div class="pb-2 font-bold">Choose video resolution</div>
@@ -46,8 +47,15 @@
         </div>
         <div class="pb-2 text-right">
           <button
-            class="bg-indigo-800 hover:bg-indigo-700 transition-colors duration-150 px-4 py-2 rounded text-gray-200"
+            class="bg-161616/50 transition-colors duration-150 px-4 py-2 rounded text-gray-200 cursor-default select-none"
+            v-if="store.state.ffFileOkPre"
+          >
+            <span class="inline-block animate-pulse">⏳&ensp;Compress</span>
+          </button>
+          <button
+            class="bg-indigo-800 hover:bg-indigo-700 transition-colors duration-150 px-4 py-2 rounded text-gray-200 select-none"
             v-on:click="onSubmit"
+            v-else
           >
             🦋&ensp;Compress
           </button>
@@ -85,6 +93,13 @@
           >
             Compress new video
           </button>
+        </div>
+        <div
+          class="pt-2 pb-2"
+          v-if="store.state.consoleErr"
+        >
+          <span class="absolute transition-all duration-150">⚠</span>
+          <span class="ml-8">{{ store.state.consoleErr }}</span>
         </div>
       </div>
 
@@ -153,6 +168,7 @@ const onFileChanged = async (event: Event) => {
     return store.commit("consoleErr", "No file selected");
   }
   store.commit("consoleErr", "");
+  store.commit("ffFileOkPre", true);
   inputFile.value = target.files[0];
   store.commit("ffFilename", target.files[0].name);
   store.commit("ffFilesize", target.files[0].size);
@@ -178,6 +194,7 @@ const onFileChanged = async (event: Event) => {
     target.files[0],
     targetScale.value
   )) as number;
+  store.commit("ffFileOkPre", false);
 };
 
 // onSubmit - called when submit button is pressed245
@@ -185,10 +202,14 @@ const onFileChanged = async (event: Event) => {
 const onSubmit = async () => {
   if (!inputFile.value) {
     return store.commit("consoleErr", "No file selected");
-  }
+  };
   if (store.state.ffFilesize < Number(targetSize.value) * 1024 * 1024) {
     return store.commit("consoleErr", "File is smaller than your target size!");
-  }
+  };
+  console.log(targetSize.value, Number(minimumSize.value)/1024/1024);
+  if (targetSize.value < Number(minimumSize.value)/1024/1024) {
+    return store.commit("consoleErr", "Target size is too small!");
+  };
 
   store.commit("ffFileOk", true);
 

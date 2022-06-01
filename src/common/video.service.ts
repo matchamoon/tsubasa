@@ -81,7 +81,8 @@ export default class VideoService {
 
     const parameters = this.getTargetParameters(videoInfo, targetSize);
 
-    return (parameters.audioRate * parameters.duration) / 8192;
+    // The final *1024 is to convert back to bytes
+    return ((parameters.audioRate * parameters.duration) / 8192) * 1024 * 1024;
   }
 
   private async transcode(
@@ -91,7 +92,7 @@ export default class VideoService {
     targetScale: number
   ) {
     const targetMinimumSize =
-      (parameters.audioRate * parameters.duration) / 8192;
+      ((parameters.audioRate * parameters.duration) / 8192) * 1024 * 1024;
 
     if (targetMinimumSize > targetSize) {
       return store.commit("consoleErr", "Target size too small");

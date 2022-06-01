@@ -6,6 +6,7 @@ export interface State {
   consoleMsg: string;
   ffFilename: string;
   ffFileOk: boolean;
+  ffFileOkPre: boolean;
   ffFilesize: number;
   ffProgress: number;
 }
@@ -18,6 +19,7 @@ export const store = createStore<State>({
     consoleMsg: "",
     ffFilename: "",
     ffFileOk: false,
+    ffFileOkPre: false,
     ffFilesize: 0,
     ffProgress: 0,
   },
@@ -33,6 +35,9 @@ export const store = createStore<State>({
     },
     ffFileOk(state, data) {
       state.ffFileOk = data;
+    },
+    ffFileOkPre(state, data) {
+      state.ffFileOkPre = data;
     },
     ffFilesize(state, data) {
       state.ffFilesize = data;
