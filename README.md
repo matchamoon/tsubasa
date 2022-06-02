@@ -22,3 +22,5 @@ With [the return of secure WASM support in browsers](https://hacks.mozilla.org/2
 Tsubasa is a work in progress, and welcomes feature suggestions, bug reports, and pull requests.
 
 [See the Wiki for development setup >](https://github.com/matchamoon/tsubasa/wiki)
+
+Tsubasa was named after [翼, the Japanese kanji for "wing"](https://jisho.org/search/%E7%BF%BC).

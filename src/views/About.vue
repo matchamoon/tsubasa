@@ -3,6 +3,7 @@
     <div class="max-w-6xl mx-auto py-6 px-4 sm:px-6 lg:px-8 text-gray-200">
       <h1 class="text-3xl font-bold leading-tight pt-6 pb-2 text-gray-100">Tsubasa 🦋</h1>
       <p class="py-2">Tsubasa is a fast video compression service that runs locally on your device. Maintain the best quality while staying under MB file limits.</p>
+      <p class="py-2">Tsubasa was named after <a href="https://jisho.org/search/%E7%BF%BC" target="_blank" rel="noopener" class="text-indigo-300 hover:text-indigo-200 transition duration-150">翼, the Japanese kanji for "wing"</a>.</p>
       <p class="py-2">Source code: <a href="https://github.com/matchamoon/tsubasa" target="_blank" rel="noopener" class="text-indigo-300 hover:text-indigo-200 transition duration-150">https://github.com/matchamoon/tsubasa</a></p>
       <h1 class="text-2xl font-bold leading-tight pt-6 pb-2 text-gray-100">Why Tsubasa</h1>
       <p class="py-2">Tsubasa was created as a proof-of-concept for a ffmpeg-wasm implementation.</p>
