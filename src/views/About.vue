@@ -19,7 +19,7 @@
       <p class="py-2">Tsubasa is a work in progress, and welcomes feature suggestions, bug reports, and pull requests.</p>
       <p class="py-2">Source code: <a href="https://github.com/matchamoon/tsubasa" target="_blank" rel="noopener" class="text-indigo-300 hover:text-indigo-200 transition duration-150">https://github.com/matchamoon/tsubasa</a></p>
       <h1 class="text-2xl font-bold leading-tight pt-6 pb-2 text-gray-100">Licenses</h1>
-      <p class="py-2">License: <a href="https://github.com/matchamoon/tsubasa/blob/master/LICENSE" target="_blank" rel="noopener" class="text-indigo-300 hover:text-indigo-200 transition duration-150">https://github.com/matchamoon/tsubasa/blob/master/LICENSE</a></p>
+      <p class="py-2">License: <a href="https://github.com/matchamoon/tsubasa/blob/master/LICENSE" target="_blank" rel="noopener" class="text-indigo-300 hover:text-indigo-200 transition duration-150 break-words">https://github.com/matchamoon/tsubasa/blob/master/LICENSE</a></p>
       <p class="py-2">Tsubasa was built using:</p>
       <ul class="list-disc pl-6">
         <li v-for="lic in licenses" :key="lic.title"><a :href="lic.url" target="_blank" rel="noopener" class="text-indigo-300 hover:text-indigo-200 transition duration-150">{{ lic.title }}</a></li>
