@@ -147,7 +147,7 @@ import VideoService from "../common/video.service";
 const inputFile = ref<File | null>(null);
 const video = ref<string | null>(null);
 
-let targetSize = ref(8);
+let targetSize = ref(25);
 let targetScale = ref(1.0);
 let targetScaleAuto = ref(false);
 let resScale = ref([1.0, 0.75, 0.5, 0.25]);
