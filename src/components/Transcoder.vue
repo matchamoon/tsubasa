@@ -129,9 +129,14 @@
           class="rounded shadow cursor-pointer"
           controls
         />
-        <div class="text-sm text-gray-300 pt-2">
-          <b>To save:</b>&ensp;Right-click/long-press the video and click
-          Save Video
+        <div class="text-sm text-gray-300 pt-2 flex items-center gap-4">
+          <a
+            :href="video"
+            :download="`compressed_${store.state.ffFilename}`"
+            class="bg-indigo-800/50 hover:bg-indigo-800/80 transition-colors duration-150 px-3 py-1 rounded text-gray-200"
+          >
+            📥 Download
+          </a>
         </div>
       </div>
     </div>
